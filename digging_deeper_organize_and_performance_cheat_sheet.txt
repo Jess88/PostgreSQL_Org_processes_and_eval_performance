@@ -1,10 +1,3 @@
-
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-************************                                      DAY 1                                             ************************
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-
 ********************************************************************************************************
 ********                                     Comments/Notes                                     ********
 ********************************************************************************************************
@@ -37,84 +30,42 @@ Types:
 	 	Ex: collect of whole numbers would be an array of integers where the type for all values in the collection (array) 
 	            are all integers
 		    
-
-********************************************************************************************************
-********                                 Denormalized vs. Normalized                            ********
-********************************************************************************************************
-	Denormalized - Generally storing all relevant information in each table/column fully, even if is considered redundant
-	Normalized - Efficiently organizing data so that shared values are defined in 1 location
-	
 	
 ********************************************************************************************************
-********                                     Selecting Data                                     ********
+********          Key Concept Review - Select Functions: Select and Aliasing                    ********
 ********************************************************************************************************
 	Select
 		SELECT * FROM <table>;        -- return all data (columns and rows) in the table
 		Examples: SELECT * FROM users;
 		          SELECT * FROM products;
-		
+	
+	
 	Aliasing 
 		Format: SELECT <column> AS col_alias FROM <table> AS table_alias; 
 	        	rename your columns and tables so you don't have to type out the full names 
 	        	NOTE: columns and tables alias names must start with a letter and cannot start with a number 
-		Example: SELECT address as addr FROM users u;
+		Examples: SELECT o.shipping_total AS total FROM orders o;
+		
+			SELECT o.shipping_total AS total 
+			FROM orders o
+			JOIN order_products op on op.order_id = o.id
+			JOIN cart_products cp on cp.product_id = op.product_id
 	
-
-********************************************************************************************************
-********                                   Limit and Order By                                   ********
-********************************************************************************************************	
-	Limit
-		Format: Limit # -- only return # rows
-		Example: SELECT * FROM products limit 10;
-	
-	ORDER BY
-		Format: Order by <column/value>     -- return results ordered by the indicated value. Must use raw column name, not alias
-			By default order by will return ascending, use 'desc' to return descending
-				Example: 
-					SELECT * FROM products
-					ORDER BY price desc;
-			
-			By Column Number: You can refer the column number for the data you want to order on, 
-					  based on the order the columns are selected
-				Example:
-					SELECT id, price FROM products 
-					ORDER BY 2 -- will order by price since price is the 2nd column being selected
-					LIMIT 1;
-					
-			Nulls: Nulls can be specifically addressed after the rest of the order by statement
-				Example: 
-					SELECT * FROM orders 
-					ORDER BY status NULLS FIRST
-		
-		
-********************************************************************************************************
-********                                       Casting values                                   ********
-********************************************************************************************************
-Sometimes columns 'type' doesn't match what you're evaluating, for this use CAST
-	Format: CAST(<column/result> AS <type>)
-	Format: <column/result>::<type>
-		Note: By default cast will round for you
-	Examples:
-		SELECT CAST(order_total as int), order_total from orders;
-		
-		SELECT order_total::INT, order_total from orders;
-		
-		SELECT CAST(shipping_total AS int) as int_total, 
-		shipping_total::INTEGER as int_v2_total
-		FROM orders;
 	
 	
 ********************************************************************************************************
-********                                Unique Records & Grouping                               ********
+********          Key Concept Review - Select Functions: Unique Records & Grouping              ********
 ********************************************************************************************************
 	Unique records: Distinct and Group by 
 		Format - Group by: Group by <column/value>    -- will group identical rows into a single row. Must use raw column name, not alias
 		Format - Distinct: Distinct <column> -- will only select unique rows of data selected/returned, any duplicate rows are not returned.
 	Examples: 
 		SELECT product_type_id FROM products
-		GROUP BY product_type_id;
+		GROUP BY product_type_id
+		ORDER BY product_type_id;
 		
-		SELECT DISTINCT product_type_id FROM products;
+		SELECT DISTINCT product_type_id FROM products
+		ORDER BY product_type_id;
 	
 	Group By & column number reference: Refer to the columns selected by the order they are returned instead of the column itself
 		Example:
@@ -123,7 +74,7 @@ Sometimes columns 'type' doesn't match what you're evaluating, for this use CAST
 	
 	
 ********************************************************************************************************
-********                                     Aggregate functions                                ********
+********         Key Concept Review - Select Functions: Math/Aggregate functions               ********
 ********************************************************************************************************
 Aggregate functions 
 	Note: If you select any columns/values that are not aggregate functions, 
@@ -149,27 +100,29 @@ Aggregate functions
 		Format: MAX(<column/value>), MIN(<column/value>)
 		Example
 		
-	Examples:
-		Select AVG(price) as avg_price,
-		SUM(price) as total_cost,
-		COUNT(price) as total_products,
-		MIN(price) as least_cost,
-		MAX(price) as most_cost
-		FROM products; 
+	Example:
+		SELECT SUM(shipping_total) as shipping_total, 
+		COUNT(*) as total_orders, 
+		AVG(order_total) as avg_order,
+		EXTRACT(MONTH FROM TIMESTAMP created_at) as month, 
+		EXTRACT(YEAR FROM TIMESTAMP created_at) as year
+		FROM orders
+		ORDER BY year, month;
 		
 		Group by example: When you select non-aggregate columns/values - Get the results by user_id
-		Select AVG(price) as avg_price,
-		SUM(price) as total_cost,
-		COUNT(price) as total_products,
-		MIN(price) as least_cost,
-		MAX(price) as most_cost,
+		SELECT SUM(shipping_total) as shipping_total, 
+		COUNT(*) as total_orders, 
+		AVG(order_total) as avg_order,
+		EXTRACT(MONTH FROM TIMESTAMP created_at) as month, 
+		EXTRACT(YEAR FROM TIMESTAMP created_at) as year,
 		user_id
-		FROM products
+		FROM orders
+		ORDER BY year, month
 		GROUP BY user_id;
 
 
 ********************************************************************************************************
-********                                    Date Select Functions                               ********
+********          Key Concept Review - Select Functions:  Date Select Functions                 ********
 ********************************************************************************************************
 	EXTRACT(Value From <date/timestamp>)
       	Examples:
@@ -189,6 +142,32 @@ Aggregate functions
 		GROUP BY year, month, week
 		ORDER BY year, month, week; 
 
+
+		
+********************************************************************************************************
+********                  Key Concept Review - Casting values                                   ********
+********************************************************************************************************
+Sometimes columns 'type' doesn't match what you're evaluating, for this use CAST
+	Format: CAST(<column/result> AS <type>)
+	Format: <column/result>::<type>
+		Note: By default cast will round for you
+	Examples:
+		SELECT CAST(order_total as int), order_total from orders;
+		
+		SELECT order_total::INT, order_total from orders;
+		
+		SELECT CAST(shipping_total AS int) as int_total, 
+		shipping_total::INTEGER as int_v2_total
+		FROM orders;
+		
+		
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                             KEY CONCEPTS NOT REVIEWED IN CLASS                         ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	
 
 ********************************************************************************************************
 ********                                        Filtering                                       ********
@@ -331,14 +310,6 @@ Aggregate functions
 		SELECT * FROM orders 
 		WHERE created_at >= (now() - interval '1 month')
 
-
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-************************                                      DAY 2                                             ************************
-****************************************************************************************************************************************
-****************************************************************************************************************************************
-
-
 ********************************************************************************************************
 ********                                    Set Operators                                       ********
 ********************************************************************************************************
@@ -448,3 +419,273 @@ Create Table
 	
 	select * from special_partner_products;
 
+
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                ADVANCED FUNCTIONS                                      ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	
+	
+********************************************************************************************************
+********                            Having vs. Where                                            ********
+********************************************************************************************************
+This won't run because aggregate functions can't be in where clause: 
+	Select product_id, count(*) from order_products
+	WHERE count(*) > 2
+	GROUP BY product_id
+	ORDER BY count desc
+
+Instead using having:
+	Select product_id, count(*) from order_products
+	GROUP BY product_id
+	HAVING count(*) > 2
+	ORDER BY count(*) desc
+
+
+********************************************************************************************************
+********                            Concatenate Text                                            ********
+********************************************************************************************************
+	Format: Select <thing to put first> || <thing2> || ... AS some_column FROM <table>;
+	
+	Example:
+		SELECT 'add text: ' || name as new_name FROM products;
+
+
+********************************************************************************************************
+********                          Random and Rounding                                           ********
+********************************************************************************************************
+	Returns a random value between 0 and 1: Select random();
+	Returns a random value between 0 and 10: Select random() * 10;
+	
+	round - Round to the nearest whole number
+	floor - always round down to previous whole number
+	ceiling - always round up to next whole number
+	
+	Example: 
+		SELECT random() * 10, 
+		round(random() * 10), 
+		floor(random() * 10),
+		ceiling(random() * 10)
+		
+
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                  SUB-SELECT                                            ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	Sub-Select: running a query within ( and ) and utilizing those results within a query
+	Example: 
+		SELECT random_value, 
+		round(random_value), 
+		floor(random_value),
+		ceiling(random_value)
+		FROM  (select random() * 10 AS random_value ) random_query
+	
+	Sub-select and IN: 
+		SELECT * FROM products
+		WHERE product_type_id IN (select id from product_types where name ilike '%clothing');
+
+	Sub-select and OR, AND, IN
+		SELECT * FROM products
+		WHERE grams > 10
+		OR product_type_id IN (select id from products where name = 'home decor' 
+                      				 OR name = 'kitchen and dining');
+
+	Sub-select and JOINs:
+		SELECT * FROM products p
+		JOIN (select * from product_types where name ilike '%clothing') p_types 
+		  ON p_types.id = p.product_type_id;
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                     WITH                                               ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	Format: WITH use_query_as_table as (<query from database>)
+		<Query utilizing use_query_as_table>;
+	Examples:
+		WITH clothing_product_types as (select id from product_types where name ilike '%clothing')
+
+		SELECT * FROM clothing_product_types;
+		
+		With and IN: 
+			WITH clothing_product_types as (select id from product_types where name ilike '%clothing')
+
+			SELECT * FROM products
+			WHERE product_type_id IN (select id from clothing_product_types);
+		With and JOINs: 
+			WITH clothing_product_types as (select * from product_types where name ilike '%clothing')
+			
+			SELECT * FROM products
+			JOIN clothing_product_types p_types ON p_types.id = p.product_type_id;
+
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                              TEMPORARY TABLES                                          ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+
+	Format: CREATE TEMPORARY TABLE <table_name> as (<query>);  SELECT * FROM <table_name>;
+	Examples: 
+		CREATE TEMPORARY TABLE clothing_product_types as 
+		(select * from product_types where name ilike '%clothing');
+		
+		SELECT * FROM clothing_product_types;
+
+	Temporarty tables and JOINs:
+		CREATE TEMPORARY TABLE clothing_product_types as 
+		(select * from product_types where name ilike '%clothing');
+		
+		SELECT * FROM products
+		JOIN clothing_product_types p_types ON p_types.id = product_type_id;
+
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                    VIEWS                                               ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+	Create View: 
+		CREATE VIEW <view_name> AS <query>;
+		CREATE VIEW <view_name> (<col1_name>, <col2_name>,...) AS <query>;
+		
+	Create or Replace View: 
+		CREATE OR REPLACE VIEW <view_name> AS <query>;
+		CREATE OR REPLACE VIEW <view_name> (<col1_name>, <col2_name>,...) AS <query>;
+		
+	Temporary View: 
+		CREATE TEMPORARY VIEW <view_name> AS <query>;
+		CREATE TEMPORARY VIEW <view_name> (<col1_name>, <col2_name>,...) AS <query>;
+		
+	Examples: 
+		CREATE VIEW clothing
+		AS SELECT id as product_type_id, 
+		name
+		FROM product_types
+		WHERE name ilike '%clothing'
+
+		CREATE VIEW clothing
+		(product_type_id,name)
+		AS SELECT id, name
+		FROM product_types
+		WHERE name ilike '%clothing'
+	
+		CREATE OR REPLACE VIEW clothing
+		(product_type_id,name)
+		AS SELECT id, name
+		FROM product_types
+		WHERE name ilike '%clothing'
+
+		CREATE OR REPLACE TEMPORARY VIEW temp_clothing
+		AS SELECT id as product_type_id, 
+		name
+		FROM product_types
+		WHERE name ilike '%clothing';
+
+		SELECT * FROM temp_clothing
+		
+		CREATE OR REPLACE VIEW user_updated_carts 
+		AS select * from carts where last_updated >= '2018-01-01';
+
+		SELECT * from users where id in (SELECT user_id from user_updated_carts) 
+
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                  VIEWS LAB                                             ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+		
+		CREATE VIEW order_product_details AS
+		SELECT order_id, product_id, 
+		name as product_name, 
+		price, grams, product_type_id,
+		orders.created_at AS order_date,
+		user_id
+		FROM products
+		JOIN order_products ON order_products.product_id = products.id
+		JOIN orders on orders.id = order_id;
+
+		SELECT count(*) FROM order_product_details;
+
+		SELECT * FROM order_product_details 
+		ORDER BY order_id, product_id;
+
+
+		INSERT INTO orders (user_id, status, shipping_total, order_total, address, created_at) 
+		VALUES
+		(13, 'order confirmed', (1 + round(random() *1000)), 10.00, '123 nowhere 12345', now() ),
+		(14, 'order confirmed', (1 + round(random() *1000)), 20.00, '234 somewhere 23456', now() ),
+		(15, 'order confirmed', (1 + round(random() *1000)), 30.00, '345 anywhere 34567', now() )
+
+		SELECT * FROM orders order by created_at desc;
+		select count(*) from products
+		INSERT INTO order_products (order_id, product_id)
+		VALUES
+		(160,1),
+		(160,2),
+		(160,3),
+		(161,4),
+		(161,5),
+		(161,6),
+		(162,7),
+		(162,8),
+		(162,9),
+		(162, (1 + round(random() *50)));
+
+		SELECT * FROM order_product_details 
+		ORDER BY order_id desc, product_id;
+
+		--CASCADE
+		CREATE TABLE carts_cascade AS SELECT * FROM carts;
+
+
+
+		CREATE VIEW updated_carts 
+		AS select * from carts_cascade 
+		WHERE last_updated > '2018-01-01';
+
+		SELECT * FROM updated_carts;
+
+		--TRUNCATE
+		TRUNCATE carts_cascade;
+		
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+************************                                  INDEXES                                               ************************
+****************************************************************************************************************************************
+****************************************************************************************************************************************
+
+Starting Query: 
+	SELECT order_id, product_id, 
+	name as product_name, 
+	price, grams, product_type_id,
+	orders.created_at AS order_date, 
+	user_id
+	FROM products
+	JOIN order_products ON order_products.product_id = products.id
+	JOIN orders on orders.id = order_id;
+	
+	Create Index: 
+		Format: CREATE INDEX <index_name> ON <table> (<column>)
+		Example: 
+			CREATE INDEX p_type_products_index ON products (product_type_id)
+			
+QUERY TO IMPROVE: 
+	select * from products
+	Join cart_products on products.id = cart_products.product_id
+	Join order_products on products.id = order_products.product_id
+	join carts on cart_products.cart_id = carts.id 
+	join orders on orders.id = order_products.order_id
+
+First need some more data!
+	INSERT INTO cart_products (cart_id, product_id, created_at)
+	SELECT floor(random_to((select max(id) from carts ))),floor(random_to((select max(id) from products)) ), now() 
+	FROM generate_series(1,5000000);
+
+	INSERT INTO order_products (order_id, product_id) 
+	SELECT floor(random_to((select max(id) from orders ))),floor(random_to((select max(id) from products)) )
+	FROM generate_series(1,5000000);
